@@ -28,25 +28,26 @@
   </form>
 
   <script>
-    const responseTimes = {};
-    let currentQuestion = null;
-    let startTime = Date.now();
+    const responseTimes = {}; // Store response times for each question
+    const startTimes = {}; // Store the start time when a question is answered
 
     // Attach event listeners to radio buttons
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
       radio.addEventListener('change', (event) => {
-        const questionId = event.target.name; // Get the question name (e.g., 'q1')
-        if (!responseTimes[questionId]) {
-          const endTime = Date.now();
-          responseTimes[questionId] = endTime - startTime; // Calculate time taken
-          startTime = endTime; // Reset the start time for the next question
+        const questionId = event.target.name; // Get question name (e.g., 'q1')
+        if (!startTimes[questionId]) {
+          startTimes[questionId] = Date.now(); // Record the time the user answered
         }
       });
     });
 
-    // Log response times when the form is submitted
+    // Capture response times when the form is submitted
     document.getElementById('submitBtn').addEventListener('click', () => {
-      console.log('Response Times:', responseTimes); // Logs response times for each question
+      Object.keys(startTimes).forEach((questionId) => {
+        responseTimes[questionId] = Date.now() - startTimes[questionId]; // Calculate response time
+      });
+
+      console.log('Response Times:', responseTimes); // Log response times in milliseconds
       alert('Responses recorded! Check the console for response times.');
     });
   </script>
