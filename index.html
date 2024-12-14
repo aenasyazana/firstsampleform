@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Timed Quiz</title>
   <style>
-    body { font-family: Arial, sans-serif; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
     .question { margin-bottom: 20px; }
   </style>
 </head>
 <body>
+  <h1>Timed Quiz</h1>
   <form id="quizForm">
     <div class="question" id="question1">
       <label>1. What is the capital of Malaysia?</label><br>
@@ -16,33 +18,35 @@
       <input type="radio" name="q1" value="Penang"> Penang<br>
       <input type="radio" name="q1" value="Johor Bahru"> Johor Bahru<br>
     </div>
-
     <div class="question" id="question2">
       <label>2. What is Malaysia's national language?</label><br>
       <input type="radio" name="q2" value="Malay"> Malay<br>
       <input type="radio" name="q2" value="English"> English<br>
       <input type="radio" name="q2" value="Chinese"> Chinese<br>
     </div>
-
     <button type="button" id="submitBtn">Submit</button>
   </form>
 
   <script>
     const responseTimes = {};
-    let currentQuestionStart = Date.now();
+    let currentQuestion = null;
+    let startTime = Date.now();
 
-    document.querySelectorAll('.question').forEach((question, index) => {
-      question.addEventListener('click', () => {
-        const questionId = `question${index + 1}`;
+    // Attach event listeners to radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach((radio) => {
+      radio.addEventListener('change', (event) => {
+        const questionId = event.target.name; // Get the question name (e.g., 'q1')
         if (!responseTimes[questionId]) {
-          responseTimes[questionId] = Date.now() - currentQuestionStart;
-          currentQuestionStart = Date.now();
+          const endTime = Date.now();
+          responseTimes[questionId] = endTime - startTime; // Calculate time taken
+          startTime = endTime; // Reset the start time for the next question
         }
       });
     });
 
+    // Log response times when the form is submitted
     document.getElementById('submitBtn').addEventListener('click', () => {
-      console.log('Response Times:', responseTimes);
+      console.log('Response Times:', responseTimes); // Logs response times for each question
       alert('Responses recorded! Check the console for response times.');
     });
   </script>
