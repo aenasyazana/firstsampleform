@@ -30,37 +30,22 @@
   </form>
 
   <script>
-    // Objects to track start times and response times
-    const startTimes = JSON.parse(localStorage.getItem('startTimes')) || {};
-    const responseTimes = JSON.parse(localStorage.getItem('responseTimes')) || {};
-
-    // Pre-fill name if saved in localStorage
+    const startTimes = {};
+    const responseTimes = {};
     const nameInput = document.getElementById('nameInput');
-    const savedName = localStorage.getItem('participantName');
-    if (savedName) {
-      nameInput.value = savedName;
-    }
 
-    // Save name when entered
-    nameInput.addEventListener('input', (event) => {
-      localStorage.setItem('participantName', event.target.value);
-    });
-
-    // Event listener for radio button selection
+    // Track start times for each question
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
       radio.addEventListener('change', (event) => {
-        const questionId = event.target.name; // Get the question name (e.g., 'q1')
-
-        // Record the start time for the question only if it's not already recorded
+        const questionId = event.target.name;
         if (!startTimes[questionId]) {
           startTimes[questionId] = Date.now();
-          localStorage.setItem('startTimes', JSON.stringify(startTimes)); // Save to localStorage
         }
       });
     });
 
-    // Calculate response times on form submission
-    document.getElementById('submitBtn').addEventListener('click', () => {
+    // Submit form data
+    document.getElementById('submitBtn').addEventListener('click', async () => {
       const participantName = nameInput.value.trim();
 
       if (!participantName) {
@@ -69,16 +54,32 @@
       }
 
       Object.keys(startTimes).forEach((questionId) => {
-        // Convert response times to seconds
         responseTimes[questionId] = ((Date.now() - startTimes[questionId]) / 1000).toFixed(2);
       });
 
-      localStorage.setItem('responseTimes', JSON.stringify(responseTimes)); // Save to localStorage
+      const formData = {
+        name: participantName,
+        q1Time: responseTimes['q1'] || 'N/A',
+        q2Time: responseTimes['q2'] || 'N/A',
+      };
 
-      console.log('Participant Name:', participantName);
-      console.log('Response Times (in seconds):', responseTimes);
+      // Send data to Google Sheets
+      const response = await fetch('https://script.google.com/macros/s/AKfycbwVKFaA_XdqvwMFtkSlrXPVTnzpApXQFfhfWlNSKy5MIIBnR7T1_-Jj_9GvNT0HKzWRyA/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      alert(`Thank you, ${participantName}! Your responses have been recorded. Check the console for details.`);
+      const result = await response.json();
+      if (result.result === 'success') {
+        alert(`Thank you, ${participantName}! Your responses have been recorded.`);
+      } else {
+        alert('Something went wrong. Please try again.');
+      }
+
+      console.log('Submitted Data:', formData);
     });
   </script>
 </body>
