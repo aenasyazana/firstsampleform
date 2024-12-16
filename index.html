@@ -12,6 +12,8 @@
 <body>
   <h1>Timed Quiz</h1>
   <form id="quizForm">
+    <label for="nameInput">Enter your name:</label><br>
+    <input type="text" id="nameInput" placeholder="Your name" required><br><br>
     <div class="question" id="question1">
       <label>1. What is the capital of Malaysia?</label><br>
       <input type="radio" name="q1" value="Kuala Lumpur"> Kuala Lumpur<br>
@@ -29,8 +31,20 @@
 
   <script>
     // Objects to track start times and response times
-    const startTimes = {};
-    const responseTimes = {};
+    const startTimes = JSON.parse(localStorage.getItem('startTimes')) || {};
+    const responseTimes = JSON.parse(localStorage.getItem('responseTimes')) || {};
+
+    // Pre-fill name if saved in localStorage
+    const nameInput = document.getElementById('nameInput');
+    const savedName = localStorage.getItem('participantName');
+    if (savedName) {
+      nameInput.value = savedName;
+    }
+
+    // Save name when entered
+    nameInput.addEventListener('input', (event) => {
+      localStorage.setItem('participantName', event.target.value);
+    });
 
     // Event listener for radio button selection
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
@@ -40,33 +54,32 @@
         // Record the start time for the question only if it's not already recorded
         if (!startTimes[questionId]) {
           startTimes[questionId] = Date.now();
+          localStorage.setItem('startTimes', JSON.stringify(startTimes)); // Save to localStorage
         }
       });
     });
 
     // Calculate response times on form submission
     document.getElementById('submitBtn').addEventListener('click', () => {
+      const participantName = nameInput.value.trim();
+
+      if (!participantName) {
+        alert('Please enter your name before submitting.');
+        return;
+      }
+
       Object.keys(startTimes).forEach((questionId) => {
         // Convert response times to seconds
         responseTimes[questionId] = ((Date.now() - startTimes[questionId]) / 1000).toFixed(2);
       });
 
-      console.log('Response Times (in seconds):', responseTimes); // Log response times in seconds
-      alert(`Responses recorded! Times: ${JSON.stringify(responseTimes)} seconds. Check the console for details.`);
+      localStorage.setItem('responseTimes', JSON.stringify(responseTimes)); // Save to localStorage
 
-      // Reset for new participants
-      resetTracking();
+      console.log('Participant Name:', participantName);
+      console.log('Response Times (in seconds):', responseTimes);
+
+      alert(`Thank you, ${participantName}! Your responses have been recorded. Check the console for details.`);
     });
-
-    // Function to reset tracking for a new participant
-    function resetTracking() {
-      for (const key in startTimes) {
-        delete startTimes[key];
-      }
-      for (const key in responseTimes) {
-        delete responseTimes[key];
-      }
-    }
   </script>
 </body>
 </html>
