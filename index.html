@@ -28,28 +28,44 @@
   </form>
 
   <script>
-    const responseTimes = {}; // Store response times for each question
-    const startTimes = {}; // Store the start time when a question is answered
+    // Objects to track start times and response times
+    const startTimes = {};
+    const responseTimes = {};
 
-    // Attach event listeners to radio buttons
+    // Event listener for radio button selection
     document.querySelectorAll('input[type="radio"]').forEach((radio) => {
       radio.addEventListener('change', (event) => {
-        const questionId = event.target.name; // Get question name (e.g., 'q1')
+        const questionId = event.target.name; // Get the question name (e.g., 'q1')
+
+        // Record the start time for the question only if it's not already recorded
         if (!startTimes[questionId]) {
-          startTimes[questionId] = Date.now(); // Record the time the user answered
+          startTimes[questionId] = Date.now();
         }
       });
     });
 
-    // Capture response times when the form is submitted
+    // Calculate response times on form submission
     document.getElementById('submitBtn').addEventListener('click', () => {
       Object.keys(startTimes).forEach((questionId) => {
         responseTimes[questionId] = Date.now() - startTimes[questionId]; // Calculate response time
       });
 
-      console.log('Response Times:', responseTimes); // Log response times in milliseconds
+      console.log('Response Times:', responseTimes); // Log the response times
       alert('Responses recorded! Check the console for response times.');
+
+      // Reset for new participants
+      resetTracking();
     });
+
+    // Function to reset tracking for a new participant
+    function resetTracking() {
+      for (const key in startTimes) {
+        delete startTimes[key];
+      }
+      for (const key in responseTimes) {
+        delete responseTimes[key];
+      }
+    }
   </script>
 </body>
 </html>
