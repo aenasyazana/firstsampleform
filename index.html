@@ -47,11 +47,12 @@
     // Calculate response times on form submission
     document.getElementById('submitBtn').addEventListener('click', () => {
       Object.keys(startTimes).forEach((questionId) => {
-        responseTimes[questionId] = Date.now() - startTimes[questionId]; // Calculate response time
+        // Convert response times to seconds
+        responseTimes[questionId] = ((Date.now() - startTimes[questionId]) / 1000).toFixed(2);
       });
 
-      console.log('Response Times:', responseTimes); // Log the response times
-      alert('Responses recorded! Check the console for response times.');
+      console.log('Response Times (in seconds):', responseTimes); // Log response times in seconds
+      alert(`Responses recorded! Times: ${JSON.stringify(responseTimes)} seconds. Check the console for details.`);
 
       // Reset for new participants
       resetTracking();
